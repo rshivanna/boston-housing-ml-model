@@ -1,0 +1,44 @@
+get http://localhost:5000/
+
+###
+POST http://localhost:5000/predict_api
+content-type: application/json
+
+{
+  "data": {
+    "CRIM": 1,
+    "ZN": 4,
+    "INDUS": 2,
+    "CHAS": 1,
+    "NOX": 3,
+    "RM": 3,
+    "AGE": 2,
+    "DIS": 2,
+    "RAD": 2,
+    "TAX": 2,
+    "PTRATIO": 2,
+    "B": 3666,
+    "LSTAT": 1.77
+  }
+}
+
+
+
+# {
+#   "data": {
+#     "CRIM": 0.03237,
+#     "ZN": 0.0,
+#     "INDUS": 2.18,
+#     "CHAS": 0,
+#     "NOX": 0.458,
+#     "RM": 6.998,
+#     "AGE": 45.8,
+#     "DIS": 6.0622,
+#     "RAD": 3,
+#     "TAX": 222,
+#     "PTRATIO": 18.7,
+#     "B": 394.63,
+#     "LSTAT": 2.94
+#   }
+# }
+

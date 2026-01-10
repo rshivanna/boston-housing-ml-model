@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Boston House Price Prediction</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      font-family: "Inter", "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #4f46e5, #9333ea);
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #ffffff;
+      width: 95%;
+      max-width: 900px;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #111827;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+
+    input {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 28px;
+      padding: 14px;
+      background: #4f46e5;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #4338ca;
+    }
+
+    .output {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border-left: 6px solid #4f46e5;
+      display: none;
+    }
+
+    .output strong {
+      color: #111827;
+    }
+
+    .price {
+      font-size: 22px;
+      font-weight: 700;
+      color: #16a34a;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Boston House Price Prediction</h1>
+
+     <!-- Main Input For Receiving Query to our ML -->
+    <form action="{{ url_for('predict')}}" method="post">
+      <div class="grid">
+        <div class="field">
+          <label>CRIM</label>
+          <input id="CRIM" type="number" step="0.01" placeholder="Crime rate per capita">
+        </div>
+
+        <div class="field">
+          <label>ZN</label>
+          <input id="ZN" type="number" step="0.01" placeholder="Residential land (%)">
+        </div>
+
+        <div class="field">
+          <label>INDUS</label>
+          <input id="INDUS" type="number" step="0.01" placeholder="Non-retail acres">
+        </div>
+
+        <div class="field">
+          <label>CHAS</label>
+          <input id="CHAS" type="number" step="1" placeholder="1 = near river">
+        </div>
+
+        <div class="field">
+          <label>NOX</label>
+          <input id="NOX" type="number" step="0.01" placeholder="Nitric oxides level">
+        </div>
+
+        <div class="field">
+          <label>RM</label>
+          <input id="RM" type="number" step="0.01" placeholder="Avg rooms per dwelling">
+        </div>
+
+        <div class="field">
+          <label>AGE</label>
+          <input id="AGE" type="number" step="0.01" placeholder="Older buildings (%)">
+        </div>
+
+        <div class="field">
+          <label>DIS</label>
+          <input id="DIS" type="number" step="0.01" placeholder="Distance to jobs">
+        </div>
+
+        <div class="field">
+          <label>RAD</label>
+          <input id="RAD" type="number" step="1" placeholder="Highway access index">
+        </div>
+
+        <div class="field">
+          <label>TAX</label>
+          <input id="TAX" type="number" step="1" placeholder="Property tax rate">
+        </div>
+
+        <div class="field">
+          <label>PTRATIO</label>
+          <input id="PTRATIO" type="number" step="0.01" placeholder="Pupil-teacher ratio">
+        </div>
+
+        <div class="field">
+          <label>B</label>
+          <input id="B" type="number" step="0.01" placeholder="Black population index">
+        </div>
+
+        <div class="field">
+          <label>LSTAT</label>
+          <input id="LSTAT" type="number" step="0.01" placeholder="Lower status (%)">
+        </div>
+      </div>
+
+      <!-- <button onclick="predict()">Predict House Price</button> -->
+      <button type="submit" class="btn btn-primary btn-block btn-large">Predict</button>
+    </form>
+
+<!-- View JSON Button -->
+<button onclick="openJsonPopup()" style="margin-top:12px;background:#6b7280;">
+  View Generated JSON
+</button>
+
+<!-- JSON Popup Modal -->
+<div id="jsonModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
+  <div style="
+    background:#fff;
+    max-width:600px;
+    margin:80px auto;
+    padding:20px;
+    border-radius:12px;
+    position:relative;
+  ">
+    <h3>Generated JSON</h3>
+    <pre id="popupJson" style="
+      background:#f3f4f6;
+      padding:12px;
+      border-radius:8px;
+      max-height:300px;
+      overflow:auto;
+    "></pre>
+
+    <button onclick="closeJsonPopup()" style="
+      margin-top:12px;
+      background:#ef4444;
+      color:#fff;
+      border:none;
+      padding:8px 14px;
+      border-radius:6px;
+      cursor:pointer;
+    ">
+      Close
+    </button>
+  </div>
+</div>
+
+
+    <div id="outputBox" class="output">
+      <strong>Predicted Price:</strong>
+      <div id="price" class="price"></div>
+    </div>
+
+    {{prediction_text}}
+    
+  </div>
+
+    
+  <script>
+    let generatedJson = null;
+
+    function generateJsonObject() {
+      const fields = [
+        "CRIM","ZN","INDUS","CHAS","NOX","RM",
+        "AGE","DIS","RAD","TAX","PTRATIO","B","LSTAT"
+      ];
+
+      const data = {};
+      for (let f of fields) {
+        const value = document.getElementById(f).value;
+        if (value === "") {
+          alert(`Please enter ${f}`);
+          return null;
+        }
+        data[f] = Number(value);
+      }
+
+      generatedJson = { data };
+      return generatedJson;
+    }
+
+    function openJsonPopup() {
+      const json = generateJsonObject();
+      if (!json) return;
+
+      document.getElementById("popupJson").textContent =
+        JSON.stringify(json, null, 2);
+
+      document.getElementById("jsonModal").style.display = "block";
+    }
+
+    function closeJsonPopup() {
+      document.getElementById("jsonModal").style.display = "none";
+    }
+  </script>
+
+  <script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const fields = ["RAD", "CRIM", "ZN","CHAS", "NOX", "DIS","AGE", "TAX","LSTAT","PTRATIO", "INDUS"]; // list all your inputs
+
+    fields.forEach(fieldId => {
+      const element = document.getElementById(fieldId);
+      if (element) {
+        // Random float between 1.00 - 50.00
+        element.value = (Math.random() * 49 + 1).toFixed(2);
+      }
+    });
+  });
+</script>
+
+  <script>
+    function predict() {
+      const fields = [
+        "CRIM","ZN","INDUS","CHAS","NOX","RM",
+        "AGE","DIS","RAD","TAX","PTRATIO","B","LSTAT"
+      ];
+
+      const data = {};
+      for (let f of fields) {
+        const value = document.getElementById(f).value;
+        if (value === "") {
+          alert(`Please enter ${f}`);
+          return;
+        }
+        data[f] = Number(value);
+      }
+
+      const payload = { data };
+      console.log("Sending JSON:", payload);
+
+      // MOCK OUTPUT (replace with fetch() to Flask)
+      const mockPrediction = 34.56;
+
+      document.getElementById("price").textContent =
+        `$ ${mockPrediction.toFixed(2)} (in $1000s)`;
+      document.getElementById("outputBox").style.display = "block";
+    }
+  </script>
+</body>
+</html>
